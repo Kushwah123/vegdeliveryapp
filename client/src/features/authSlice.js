@@ -1,10 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+
 
 // 🔐 LOGIN
 export const login = createAsyncThunk('auth/login', async (credentials, thunkAPI) => {
   try {
-    const res = await axios.post('/api/auth/login', credentials);
+    const res = await axios.post(`${API}/api/auth/login`, credentials);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response.data.message);
@@ -14,7 +17,7 @@ export const login = createAsyncThunk('auth/login', async (credentials, thunkAPI
 // 📝 REGISTER
 export const register = createAsyncThunk('auth/register', async (userData, thunkAPI) => {
   try {
-    const res = await axios.post('/api/auth/register', userData);
+    const res = await axios.post(`${API}/api/auth/register`, userData);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response.data.message);
@@ -30,7 +33,7 @@ export const fetchAllUsers = createAsyncThunk('auth/fetchAllUsers', async (_, th
         Authorization: `Bearer ${user.token}`,
       },
     };
-    const res = await axios.get('/api/auth/users', config);
+    const res = await axios.get(`${API}/api/auth/users`, config);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response.data.message);
@@ -46,7 +49,7 @@ export const saveUserAddress = createAsyncThunk('auth/saveUserAddress', async (a
         Authorization: `Bearer ${user.token}`,
       },
     };
-    const res = await axios.put('/api/auth/address', { address }, config);
+    const res = await axios.put(`${API}/api/auth/address`, { address }, config);
     return res.data.address;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || 'Address update failed');

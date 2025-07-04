@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const initialState = {
   items: [],
   loading: false,
@@ -12,7 +14,7 @@ export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, thunkAPI) 
   try {
     const { auth } = thunkAPI.getState();
     const config = { headers: { Authorization: `Bearer ${auth.user.token}` } };
-    const res = await axios.get('/api/cart', config);
+    const res = await axios.get(`${API}/api/cart`, config);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
@@ -39,7 +41,7 @@ export const addProductToCart = createAsyncThunk(
       }
 
       const config = { headers: { Authorization: `Bearer ${auth.user.token}` } };
-      const res = await axios.put('/api/cart', { items: updatedCart }, config);
+      const res = await axios.put(`${API}/api/cart`, { items: updatedCart }, config);
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
@@ -52,7 +54,7 @@ export const updateCart = createAsyncThunk('cart/updateCart', async (items, thun
   try {
     const { auth } = thunkAPI.getState();
     const config = { headers: { Authorization: `Bearer ${auth.user.token}` } };
-    const res = await axios.put('/api/cart', { items }, config);
+    const res = await axios.put(`${API}/api/cart`, { items }, config);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);

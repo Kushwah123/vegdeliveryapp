@@ -2,6 +2,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const initialState = {
   products: [],
   loading: false,
@@ -10,7 +12,7 @@ const initialState = {
 
 export const fetchProducts = createAsyncThunk('products/fetchAll', async (_, thunkAPI) => {
   try {
-    const res = await axios.get('/api/products');
+    const res = await axios.get(`${API}/api/products`);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response.data.message);
@@ -25,7 +27,7 @@ export const createProduct = createAsyncThunk('products/create', async (data, th
         Authorization: `Bearer ${auth.user.token}`,
       },
     };
-    const res = await axios.post('/api/products', data, config);
+    const res = await axios.post(`${API}/api/products`, data, config);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response.data.message);
@@ -40,7 +42,7 @@ export const updateProduct = createAsyncThunk('products/update', async ({ id, da
         Authorization: `Bearer ${auth.user.token}`,
       },
     };
-    const res = await axios.put(`/api/products/${id}`, data, config);
+    const res = await axios.put(`${API}/api/products/${id}`, data, config);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response.data.message);
@@ -55,7 +57,7 @@ export const deleteProduct = createAsyncThunk('products/delete', async (id, thun
         Authorization: `Bearer ${auth.user.token}`,
       },
     };
-    await axios.delete(`/api/products/${id}`, config);
+    await axios.delete(`${API}/api/products/${id}`, config);
     return id;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response.data.message);

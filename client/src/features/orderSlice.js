@@ -1,14 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API = '/api/orders';
+const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+
 
 // 🔽 PLACE ORDER
 export const placeOrder = createAsyncThunk('orders/placeOrder', async (orderData, thunkAPI) => {
   try {
     const { user } = thunkAPI.getState().auth;
     const config = { headers: { Authorization: `Bearer ${user.token}` } };
-    const res = await axios.post(API, orderData, config);
+    const res = await axios.post(`${API}/api/orders`, orderData, config);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
@@ -20,7 +22,7 @@ export const fetchMyOrders = createAsyncThunk('orders/fetchMyOrders', async (_, 
   try {
     const { user } = thunkAPI.getState().auth;
     const config = { headers: { Authorization: `Bearer ${user.token}` } };
-    const res = await axios.get(`${API}/user`, config);
+    const res = await axios.get(`${API}/api/orders/user`, config);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
@@ -32,7 +34,7 @@ export const fetchAllOrders = createAsyncThunk('orders/fetchAllOrders', async (_
   try {
     const { user } = thunkAPI.getState().auth;
     const config = { headers: { Authorization: `Bearer ${user.token}` } };
-    const res = await axios.get(`${API}/allorders`, config);
+    const res = await axios.get(`${API}/api/orders/allorders`, config);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
@@ -44,7 +46,7 @@ export const updateOrderStatus = createAsyncThunk('orders/updateOrderStatus', as
   try {
     const { user } = thunkAPI.getState().auth;
     const config = { headers: { Authorization: `Bearer ${user.token}` } };
-    const res = await axios.put(`${API}/${orderId}/status`, { status }, config);
+    const res = await axios.put(`${API}/api/orders/${orderId}/status`, { status }, config);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
@@ -56,7 +58,7 @@ export const fetchAllUsers = createAsyncThunk('orders/fetchAllUsers', async (_, 
   try {
     const { user } = thunkAPI.getState().auth;
     const config = { headers: { Authorization: `Bearer ${user.token}` } };
-    const res = await axios.get('/api/auth/users', config);
+    const res = await axios.get(`${API}/api/auth/users`, config);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
@@ -68,7 +70,7 @@ export const fetchUserOrders = createAsyncThunk('orders/fetchUserOrders', async 
   try {
     const { user } = thunkAPI.getState().auth;
     const config = { headers: { Authorization: `Bearer ${user.token}` } };
-    const res = await axios.get(`/api/orders/user/${userId}`, config); // <-- corrected route
+    const res = await axios.get(`${API}/api/orders/user/${userId}`, config); // <-- corrected route
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
@@ -80,7 +82,7 @@ export const deleteOrderById = createAsyncThunk('orders/deleteOrderById', async 
   try {
     const { user } = thunkAPI.getState().auth;
     const config = { headers: { Authorization: `Bearer ${user.token}` } };
-    await axios.delete(`/api/orders/${orderId}`, config);
+    await axios.delete(`${API}/api/orders/${orderId}`, config);
     return orderId;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
