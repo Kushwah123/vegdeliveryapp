@@ -1,25 +1,32 @@
 import { Link } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Alert, Row, Col, Card, Button } from 'react-bootstrap';
 
 const AdminPanel = () => {
   const [productsCount, setProductsCount] = useState(0);
   const [ordersCount, setOrdersCount] = useState(0);
   const [usersCount, setUsersCount] = useState(0);
   const [totalSales, setTotalSales] = useState(0);
+  const [newUsersToday, setNewUsersToday] = useState(0);
+  const [lowStockProducts, setLowStockProducts] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsRes, ordersRes, usersRes] = await Promise.all([
+        const [productsRes, ordersRes, usersRes, newUsersRes, lowStockRes] = await Promise.all([
           axios.get('/api/products'),
           axios.get('/api/orders/allorders'),
           axios.get('/api/users/all'),
+          axios.get('/api/users/newtoday'),
+          axios.get('/api/products/lowstock')
         ]);
 
         setProductsCount(productsRes.data.length);
         setOrdersCount(ordersRes.data.length);
         setUsersCount(usersRes.data.length);
+        setNewUsersToday(newUsersRes.data.count);
+        setLowStockProducts(lowStockRes.data);
 
         const sales = ordersRes.data.reduce((acc, order) => acc + order.totalAmount, 0);
         setTotalSales(sales);
@@ -32,82 +39,78 @@ const AdminPanel = () => {
   }, []);
 
   return (
-    <div className="container-fluid">
-      <div className="row min-vh-100">
-        {/* Sidebar */}
-        <div className="col-md-3 bg-dark text-white p-3">
-          <h3 className="text-center mb-4">Admin Panel</h3>
-          <ul className="nav flex-column">
-            <li className="nav-item mb-2">
-              <Link to="/admin/products" className="nav-link text-white">
-                <i className="bi bi-box-seam me-2"></i> Products
-              </Link>
-            </li>
-            <li className="nav-item mb-2">
-              <Link to="/admin/orders" className="nav-link text-white">
-                <i className="bi bi-receipt-cutoff me-2"></i> Orders
-              </Link>
-            </li>
-            <li className="nav-item mb-2">
-              <Link to="/admin/users" className="nav-link text-white">
-                <i className="bi bi-people-fill me-2"></i> Users
-              </Link>
-            </li>
-            <li className="nav-item mb-2">
-              <Link to="/" className="nav-link text-white">
-                <i className="bi bi-house-door-fill me-2"></i> Home
-              </Link>
-            </li>
-          </ul>
-        </div>
+    <div className="container-fluid px-4 py-3">
+      <h2 className="mb-4 text-success">📊 Dashboard Overview</h2>
 
-        {/* Main Content */}
-        <div className="col-md-9 p-4">
-          <h2 className="mb-4 text-success">Dashboard</h2>
+      {/* 🔔 Alerts Section */}
+      <div className="mb-4">
+        {newUsersToday > 0 && (
+          <Alert variant="info">
+            🧍‍♂️ <strong>{newUsersToday}</strong> new user(s) registered today.
+          </Alert>
+        )}
+        {lowStockProducts.length > 0 && (
+          <Alert variant="danger">
+            ⚠️ <strong>{lowStockProducts.length}</strong> product(s) have low stock.
+            <ul className="mb-0 ms-3">
+              {lowStockProducts.slice(0, 3).map((p) => (
+                <li key={p._id}>{p.name} — {p.stock} left</li>
+              ))}
+              {lowStockProducts.length > 3 && <li>...and more</li>}
+            </ul>
+          </Alert>
+        )}
+      </div>
 
-          <div className="row g-4">
-            <div className="col-md-4">
-              <div className="card text-white bg-primary">
-                <div className="card-body">
-                  <h5 className="card-title"><i className="bi bi-box-seam"></i> Total Products</h5>
-                  <p className="card-text fs-4">{productsCount}</p>
-                </div>
-              </div>
-            </div>
+      {/* 🧾 Metrics Cards */}
+      <Row className="g-4">
+        <Col md={3}>
+          <Card bg="primary" text="white" className="shadow-sm">
+            <Card.Body>
+              <Card.Title><i className="bi bi-box-seam me-2"></i>Total Products</Card.Title>
+              <Card.Text className="fs-4">{productsCount}</Card.Text>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3}>
+          <Card bg="warning" text="white" className="shadow-sm">
+            <Card.Body>
+              <Card.Title><i className="bi bi-people-fill me-2"></i>Total Users</Card.Title>
+              <Card.Text className="fs-4">{usersCount}</Card.Text>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3}>
+          <Card bg="success" text="white" className="shadow-sm">
+            <Card.Body>
+              <Card.Title><i className="bi bi-currency-rupee me-2"></i>Total Sales</Card.Title>
+              <Card.Text className="fs-4">₹{totalSales.toLocaleString()}</Card.Text>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3}>
+          <Card bg="info" text="white" className="shadow-sm">
+            <Card.Body>
+              <Card.Title><i className="bi bi-receipt me-2"></i>Total Orders</Card.Title>
+              <Card.Text className="fs-4">{ordersCount}</Card.Text>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
 
-            <div className="col-md-4">
-              <div className="card text-white bg-warning">
-                <div className="card-body">
-                  <h5 className="card-title"><i className="bi bi-people-fill"></i> Total Users</h5>
-                  <p className="card-text fs-4">{usersCount}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-4">
-              <div className="card text-white bg-success">
-                <div className="card-body">
-                  <h5 className="card-title"><i className="bi bi-currency-rupee"></i> Total Sales</h5>
-                  <p className="card-text fs-4">₹{totalSales.toLocaleString()}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-5">
-            <h4 className="mb-3">Quick Actions</h4>
-            <div className="d-flex flex-wrap gap-3">
-              <Link to="/admin/products" className="btn btn-outline-primary">
-                Manage Products
-              </Link>
-              <Link to="/admin/orders" className="btn btn-outline-warning">
-                Manage Orders
-              </Link>
-              <Link to="/admin/users" className="btn btn-outline-success">
-                Manage Users
-              </Link>
-            </div>
-          </div>
+      {/* 🚀 Quick Actions */}
+      <div className="mt-5">
+        <h4 className="mb-3">🚀 Quick Actions</h4>
+        <div className="d-flex flex-wrap gap-3">
+          <Link to="/admin/products" className="btn btn-outline-primary">
+            🧺 Manage Products
+          </Link>
+          <Link to="/admin/orders" className="btn btn-outline-warning">
+            📦 Manage Orders
+          </Link>
+          <Link to="/admin/users" className="btn btn-outline-success">
+            👥 Manage Users
+          </Link>
         </div>
       </div>
     </div>

@@ -23,6 +23,7 @@ export const fetchMyOrders = createAsyncThunk('orders/fetchMyOrders', async (_, 
     const { user } = thunkAPI.getState().auth;
     const config = { headers: { Authorization: `Bearer ${user.token}` } };
     const res = await axios.get(`${API}/api/orders/user`, config);
+    console.log(res.data);
     return res.data;
   } catch (err) {
     return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);

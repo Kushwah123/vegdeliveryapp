@@ -72,3 +72,25 @@ export const getUserDetails = async (req, res) => {
     res.status(500).json({ message: 'Server error while fetching user details' });
   }
 };
+
+// controllers/userController.js
+export const getNewUsersToday = async (req, res) => {
+  try {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const newUsers = await User.find({
+      createdAt: {
+        $gte: todayStart,
+        $lte: todayEnd
+      }
+    });
+
+    res.json({ count: newUsers.length });
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching new users' });
+  }
+};

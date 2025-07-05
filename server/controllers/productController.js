@@ -36,6 +36,17 @@ export const updateProduct = async (req, res) => {
   }
 };
 
+// controllers/productController.js
+export const getLowStockProducts = async (req, res) => {
+  try {
+    const lowStock = await Product.find({ stock: { $lte: 5 } });
+    res.json(lowStock);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 export const deleteProduct = async (req, res) => {
   const product = await Product.findById(req.params.id);
 

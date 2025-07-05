@@ -2,7 +2,16 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/authSlice';
-import { Navbar, Nav, Container, NavDropdown, Badge } from 'react-bootstrap';
+import {
+  Navbar,
+  Nav,
+  Container,
+  NavDropdown,
+  Badge,
+  Form,
+  FormControl,
+  Button,
+} from 'react-bootstrap';
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -17,38 +26,60 @@ const Header = () => {
   };
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" sticky="top" collapseOnSelect>
+    <Navbar bg="primary" variant="dark" expand="lg" sticky="top" className="shadow-sm">
       <Container>
-        <Navbar.Brand as={Link} to="/">🥬 Veg4You</Navbar.Brand>
+        <Navbar.Brand as={Link} to="/" className="fw-bold fs-4">
+          🥗 Veg4You
+        </Navbar.Brand>
         <Navbar.Toggle aria-controls="navbar-nav" />
         <Navbar.Collapse id="navbar-nav">
-          <Nav className="ms-auto">
+          <Nav className="ms-auto align-items-center">
 
-            {/* ✅ Show Cart only if logged in */}
-            {user && (
-              <Nav.Link as={Link} to="/cart">
-                <i className="bi bi-cart"></i> Cart{' '}
-                {items.length > 0 && <Badge bg="success">{items.length}</Badge>}
+            {/* 🔍 Search bar for users only */}
+            {user && !user.isAdmin && (
+              <Form className="d-flex me-3" onSubmit={(e) => e.preventDefault()}>
+                <FormControl
+                  type="search"
+                  placeholder="Search vegetables..."
+                  className="me-2"
+                  aria-label="Search"
+                  style={{ width: '200px' }}
+                />
+                <Button variant="light" size="sm">Search</Button>
+              </Form>
+            )}
+
+            {/* 🛒 Cart for users only */}
+            {user && !user.isAdmin && (
+              <Nav.Link as={Link} to="/cart" className="position-relative me-3">
+                <i className="bi bi-cart-fill fs-5"></i>
+                {items.length > 0 && (
+                  <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle">
+                    {items.length}
+                  </Badge>
+                )}
               </Nav.Link>
             )}
 
             {user ? (
-              <NavDropdown title={user.name} id="user-menu">
-                <NavDropdown.Item as={Link} to="/orders">
-                  <i className="bi bi-bag-check"></i> My Orders
-                </NavDropdown.Item>
+              <NavDropdown title={<><i className="bi bi-person-circle me-1"></i>{user.name}</>} id="user-menu">
+                {!user.isAdmin && (
+                  <NavDropdown.Item as={Link} to="/orders">
+                    <i className="bi bi-bag-check-fill"></i> My Orders
+                  </NavDropdown.Item>
+                )}
 
-                {(user.isAdmin || user.role === 'admin') && (
+                {user.isAdmin && (
                   <>
                     <NavDropdown.Divider />
                     <NavDropdown.Item as={Link} to="/admin/products">
-                      🧺 Manage Products
+                      <i className="bi bi-box-seam"></i> Manage Products
                     </NavDropdown.Item>
                     <NavDropdown.Item as={Link} to="/admin/orders">
-                      📦 Manage Orders
+                      <i className="bi bi-truck"></i> Manage Orders
                     </NavDropdown.Item>
                     <NavDropdown.Item as={Link} to="/admin/users">
-                      👥 Manage Users
+                      <i className="bi bi-people-fill"></i> Manage Users
                     </NavDropdown.Item>
                   </>
                 )}
@@ -64,7 +95,7 @@ const Header = () => {
                   <i className="bi bi-box-arrow-in-right"></i> Login
                 </Nav.Link>
                 <Nav.Link as={Link} to="/register">
-                  <i className="bi bi-person-plus"></i> Register
+                  <i className="bi bi-person-plus-fill"></i> Register
                 </Nav.Link>
               </>
             )}

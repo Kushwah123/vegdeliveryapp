@@ -1,6 +1,7 @@
 // frontend/src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -10,45 +11,58 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import ProtectedRoute from './components/ProtectedRoute';
-import AdminRoute from './components/AdminRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 import AdminProducts from './components/admin/AdminProducts';
 import AdminOrders from './components/admin/AdminOrders';
 import AdminUsers from './components/admin/AdminUsers';
 import AdminPanel from './pages/AdminPanel';
 import { Container } from 'react-bootstrap';
+import AdminLayout from './components/AdminLayout';
 
 const App = () => {
+  const { user } = useSelector((state) => state.auth);
+  const isAdmin = user?.isAdmin;
+
   return (
     <Router>
-      <Header />
+      {!isAdmin && <Header />}
       <main className="py-4">
-        <Container>
+        <Container fluid>
           <Routes>
-          <Route path="/" element={<Home />} />
-<Route path="/login" element={<Login />} />
-<Route path="/register" element={<Register />} />
+            {/* Admin Routes Only */}
+            <Route element={<AdminProtectedRoute />}>
+             <Route element={<AdminLayout />}>
+    <Route path="/admin" element={<AdminPanel />} />
+    <Route path="/admin/products" element={<AdminProducts />} />
+    <Route path="/admin/orders" element={<AdminOrders />} />
+    <Route path="/admin/users" element={<AdminUsers />} />
+  </Route>
+            </Route>
 
-{/* 🔐 Protected Routes for Logged-in Users */}
-<Route element={<ProtectedRoute />}>
-  <Route path="/cart" element={<Cart />} />
-  <Route path="/checkout" element={<Checkout />} />
-  <Route path="/orders" element={<Orders />} />
-</Route>
+            {/* Hide all public routes from admin */}
+            {!isAdmin && (
+              <>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
 
-{/* 🛠️ Admin Routes */}
-<Route element={<AdminRoute />}>
-  <Route path="/admin" element={<AdminPanel />} />
-  <Route path="/admin/products" element={<AdminProducts />} />
-  <Route path="/admin/orders" element={<AdminOrders />} />
-  <Route path="/admin/users" element={<AdminUsers />} />
-</Route>
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/orders" element={<Orders />} />
+                </Route>
+              </>
+            )}
 
-{/* ❌ 404 Page */}
-<Route path="*" element={<h3>404 - Page not found</h3>} />
+            {/* Handle unknown routes */}
+            <Route
+              path="*"
+              element={<Navigate to={isAdmin ? "/admin" : "/"} />}
+            />
           </Routes>
         </Container>
       </main>
-      <Footer />
+      {!isAdmin && <Footer />}
     </Router>
   );
 };

@@ -8,6 +8,8 @@ import cartRoutes from './routes/cartRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import cors from 'cors';
+import uploadRoutes from './routes/uploadRoutes.js';
+import path from 'path';
 
 dotenv.config();
 connectDB();
@@ -16,6 +18,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// uploads static
+// app.use('/uploads', express.static(path.join(path.resolve(), '/uploads')));
+
+app.use('/api/upload', uploadRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);

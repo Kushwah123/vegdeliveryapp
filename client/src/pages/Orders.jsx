@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container, Table, Badge } from 'react-bootstrap';
-import { fetchUserOrders } from '../features/orderSlice';
+import { fetchMyOrders} from '../features/orderSlice';
 
 const Orders = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { userOrders: orders, loading, error } = useSelector((state) => state.orders); // ✅ fixed line
-
+  
   useEffect(() => {
-    if (user) dispatch(fetchUserOrders());
+    if (user) dispatch(fetchMyOrders());
   }, [dispatch, user]);
 
   return (

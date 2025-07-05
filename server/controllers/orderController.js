@@ -34,7 +34,14 @@ export const getUserOrders = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   const orders = await Order.find().populate('user', 'name email');
-  res.json(orders);
+   const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const todayOrders = orders.filter(order => 
+    new Date(order.createdAt) >= today
+  );
+
+  res.json({ orders, todayCount: todayOrders.length });
 };
 
 export const updateOrderStatus = async (req, res) => {
