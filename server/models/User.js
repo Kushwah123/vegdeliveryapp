@@ -5,6 +5,11 @@ import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
   name: String,
+  mobile: {
+  type: String,
+  required: true,
+  match: [/^[0-9]{10}$/, 'Please enter a valid 10-digit mobile number'],
+},
   email: { type: String, unique: true },
   password: String,
   isAdmin: { type: Boolean, default: false },

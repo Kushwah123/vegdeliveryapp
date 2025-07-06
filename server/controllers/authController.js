@@ -5,35 +5,36 @@ import jwt from 'jsonwebtoken';
 const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
 export const registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
-  const userExists = await User.findOne({ email });
+  const { name, email, password,mobile } = req.body;
+  const userExists = await User.findOne({ mobile });
   if (userExists) return res.status(400).json({ message: 'User already exists' });
 
-  const user = await User.create({ name, email, password });
+  const user = await User.create({ name, email, password ,mobile});
   res.status(201).json({
     _id: user._id,
     name: user.name,
     email: user.email,
+    mobile: user.mobile,
     isAdmin: user.isAdmin,
     token: generateToken(user._id),
   });
 };
 
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
+  const { mobile, password } = req.body;
+  const user = await User.findOne({ mobile });
 
   if (user && (await user.matchPassword(password))) {
     res.json({
       _id: user._id,
       name: user.name,
-      email: user.email,
+      mobile: user.mobile,
       isAdmin: user.isAdmin,
       address: user.address,
       token: generateToken(user._id),
     });
   } else {
-    res.status(401).json({ message: 'Invalid email or password' });
+    res.status(401).json({ message: 'Invalid mobile number or password' });
   }
 };
 

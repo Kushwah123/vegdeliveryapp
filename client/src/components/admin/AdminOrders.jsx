@@ -75,7 +75,7 @@ const AdminOrders = () => {
 
   const lowStock = products.filter((p) => p.stock < 5);
 
-  const filteredOrders = orders
+  const filteredOrders = orders.orders
     .filter((order) =>
       statusFilter === 'all' ? true : order.status === statusFilter
     )

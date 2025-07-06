@@ -6,8 +6,8 @@ import { fetchMyOrders} from '../features/orderSlice';
 const Orders = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { userOrders: orders, loading, error } = useSelector((state) => state.orders); // ✅ fixed line
-  
+  const { myOrders, loading, error } = useSelector((state) => state.orders); // ✅ fixed line
+  console.log(myOrders);
   useEffect(() => {
     if (user) dispatch(fetchMyOrders());
   }, [dispatch, user]);
@@ -32,7 +32,7 @@ const Orders = () => {
             </tr>
           </thead>
           <tbody>
-            {orders.map((order, idx) => (
+            {myOrders.map((order, idx) => (
               <tr key={order._id}>
                 <td>{idx + 1}</td>
                 <td>

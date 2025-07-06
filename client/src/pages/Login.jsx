@@ -11,7 +11,8 @@ const Login = () => {
 
   const { user, loading, error } = useSelector((state) => state.auth);
 
-  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
+
   const [password, setPassword] = useState('');
 
   useEffect(() => {
@@ -26,7 +27,7 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(login({ email, password }));
+    dispatch(login({ mobile, password }));
   };
 
   return (
@@ -37,13 +38,15 @@ const Login = () => {
           {error && <Alert variant="danger">{error}</Alert>}
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
-              <Form.Label>Email address</Form.Label>
-              <Form.Control
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+              <Form.Label>Mobile Number</Form.Label>
+<Form.Control
+  type="tel"
+  value={mobile}
+  onChange={(e) => setMobile(e.target.value)}
+  required
+  pattern="[0-9]{10}"
+  placeholder="Enter 10-digit mobile number"
+/>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Password</Form.Label>

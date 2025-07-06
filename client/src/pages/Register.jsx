@@ -14,6 +14,8 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mobile, setMobile] = useState('');
+
 
   useEffect(() => {
     if (user) navigate('/');
@@ -21,7 +23,7 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(register({ name, email, password }));
+    dispatch(register({ name, email, password, mobile }));
   };
 
   return (
@@ -39,6 +41,18 @@ const Register = () => {
                 onChange={(e) => setName(e.target.value)}
                 required
               />
+              <Form.Group className="mb-3">
+  <Form.Label>Mobile Number</Form.Label>
+  <Form.Control
+    type="tel"
+    value={mobile}
+    onChange={(e) => setMobile(e.target.value)}
+    required
+    pattern="[0-9]{10}"  // केवल 10 digit नंबर
+    placeholder="Enter 10-digit mobile number"
+  />
+</Form.Group>
+
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>Email address</Form.Label>

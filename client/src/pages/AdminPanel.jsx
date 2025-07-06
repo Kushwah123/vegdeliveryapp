@@ -1,48 +1,64 @@
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Container, Row, Col, Card, Alert, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Alert, Row, Col, Card, Button } from 'react-bootstrap';
+import { fetchProducts } from '../features/productSlice';
+import { fetchAllOrders } from '../features/orderSlice';
+import { fetchAllUsers } from '../features/authSlice';
 
 const AdminPanel = () => {
-  const [productsCount, setProductsCount] = useState(0);
-  const [ordersCount, setOrdersCount] = useState(0);
-  const [usersCount, setUsersCount] = useState(0);
-  const [totalSales, setTotalSales] = useState(0);
-  const [newUsersToday, setNewUsersToday] = useState(0);
-  const [lowStockProducts, setLowStockProducts] = useState([]);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [productsRes, ordersRes, usersRes, newUsersRes, lowStockRes] = await Promise.all([
-          axios.get('/api/products'),
-          axios.get('/api/orders/allorders'),
-          axios.get('/api/users/all'),
-          axios.get('/api/users/newtoday'),
-          axios.get('/api/products/lowstock')
-        ]);
+    dispatch(fetchProducts());
+    dispatch(fetchAllOrders());
+    dispatch(fetchAllUsers());
+  }, [dispatch]);
 
-        setProductsCount(productsRes.data.length);
-        setOrdersCount(ordersRes.data.length);
-        setUsersCount(usersRes.data.length);
-        setNewUsersToday(newUsersRes.data.count);
-        setLowStockProducts(lowStockRes.data);
+  const { products, loading: productLoading } = useSelector((state) => state.products);
+  const { orders: ordersObj, loading: orderLoading } = useSelector((state) => state.orders);
+  const { users, loading: userLoading } = useSelector((state) => state.auth);
 
-        const sales = ordersRes.data.reduce((acc, order) => acc + order.totalAmount, 0);
-        setTotalSales(sales);
-      } catch (error) {
-        console.error('Error fetching admin dashboard data:', error);
-      }
-    };
 
-    fetchData();
-  }, []);
+  const isLoading = productLoading || orderLoading || userLoading;
+
+  const productsCount = Array.isArray(products) ? products.length : 0;
+  // const ordersCount = Array.isArray(orders) ? orders.length : 0;
+  const usersCount = Array.isArray(users) ? users.length : 0;
+
+  // const totalSales = Array.isArray(orders)
+  //   ? orders.reduce((acc, order) => acc + (order.totalAmount || 0), 0)
+  //   : 0;
+  // ✅ Safe fallback अगर ordersObj.orders नहीं मिला तो खाली array
+const orderList = Array.isArray(ordersObj?.orders) ? ordersObj.orders : [];
+
+const totalSales = orderList.reduce((acc, order) => acc + (order.totalAmount || 0), 0);
+const ordersCount = orderList.length;
+
+  const today = new Date().toDateString();
+
+  const newUsersToday = Array.isArray(users)
+    ? users.filter((u) => new Date(u.createdAt).toDateString() === today).length
+    : 0;
+
+  const lowStockProducts = Array.isArray(products)
+    ? products.filter((p) => p.stock < 5)
+    : [];
+
+  if (isLoading) {
+    return (
+      <div className="text-center my-5">
+        <Spinner animation="border" variant="success" />
+        <p className="mt-3">Loading Dashboard...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="container-fluid px-4 py-3">
-      <h2 className="mb-4 text-success">📊 Dashboard Overview</h2>
+    <Container fluid className="py-4 px-3 px-md-5">
+      <h2 className="mb-4 text-success text-center text-md-start">📊 Dashboard Overview</h2>
 
-      {/* 🔔 Alerts Section */}
+      {/* Alerts */}
       <div className="mb-4">
         {newUsersToday > 0 && (
           <Alert variant="info">
@@ -54,7 +70,9 @@ const AdminPanel = () => {
             ⚠️ <strong>{lowStockProducts.length}</strong> product(s) have low stock.
             <ul className="mb-0 ms-3">
               {lowStockProducts.slice(0, 3).map((p) => (
-                <li key={p._id}>{p.name} — {p.stock} left</li>
+                <li key={p._id}>
+                  {p.name} — {p.stock} left
+                </li>
               ))}
               {lowStockProducts.length > 3 && <li>...and more</li>}
             </ul>
@@ -62,46 +80,54 @@ const AdminPanel = () => {
         )}
       </div>
 
-      {/* 🧾 Metrics Cards */}
+      {/* Metrics Cards */}
       <Row className="g-4">
-        <Col md={3}>
-          <Card bg="primary" text="white" className="shadow-sm">
+        <Col xs={12} sm={6} lg={3}>
+          <Card className="text-center shadow-sm bg-primary text-white">
             <Card.Body>
-              <Card.Title><i className="bi bi-box-seam me-2"></i>Total Products</Card.Title>
+              <Card.Title>
+                <i className="bi bi-box-seam me-2"></i>Total Products
+              </Card.Title>
               <Card.Text className="fs-4">{productsCount}</Card.Text>
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card bg="warning" text="white" className="shadow-sm">
+        <Col xs={12} sm={6} lg={3}>
+          <Card className="text-center shadow-sm bg-warning text-white">
             <Card.Body>
-              <Card.Title><i className="bi bi-people-fill me-2"></i>Total Users</Card.Title>
+              <Card.Title>
+                <i className="bi bi-people-fill me-2"></i>Total Users
+              </Card.Title>
               <Card.Text className="fs-4">{usersCount}</Card.Text>
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card bg="success" text="white" className="shadow-sm">
+        <Col xs={12} sm={6} lg={3}>
+          <Card className="text-center shadow-sm bg-success text-white">
             <Card.Body>
-              <Card.Title><i className="bi bi-currency-rupee me-2"></i>Total Sales</Card.Title>
+              <Card.Title>
+                <i className="bi bi-currency-rupee me-2"></i>Total Sales
+              </Card.Title>
               <Card.Text className="fs-4">₹{totalSales.toLocaleString()}</Card.Text>
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card bg="info" text="white" className="shadow-sm">
+        <Col xs={12} sm={6} lg={3}>
+          <Card className="text-center shadow-sm bg-info text-white">
             <Card.Body>
-              <Card.Title><i className="bi bi-receipt me-2"></i>Total Orders</Card.Title>
+              <Card.Title>
+                <i className="bi bi-receipt me-2"></i>Total Orders
+              </Card.Title>
               <Card.Text className="fs-4">{ordersCount}</Card.Text>
             </Card.Body>
           </Card>
         </Col>
       </Row>
 
-      {/* 🚀 Quick Actions */}
+      {/* Quick Actions */}
       <div className="mt-5">
-        <h4 className="mb-3">🚀 Quick Actions</h4>
-        <div className="d-flex flex-wrap gap-3">
+        <h4 className="mb-3 text-center text-md-start">🚀 Quick Actions</h4>
+        <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
           <Link to="/admin/products" className="btn btn-outline-primary">
             🧺 Manage Products
           </Link>
@@ -113,7 +139,7 @@ const AdminPanel = () => {
           </Link>
         </div>
       </div>
-    </div>
+    </Container>
   );
 };
 
