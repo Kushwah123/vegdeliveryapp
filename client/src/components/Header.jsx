@@ -1,12 +1,11 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/authSlice';
 import {
   Navbar,
   Nav,
   Container,
-  NavDropdown,
   Badge,
   Form,
   FormControl,
@@ -16,6 +15,7 @@ import {
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { user } = useSelector((state) => state.auth);
   const { items } = useSelector((state) => state.cart);
@@ -25,33 +25,35 @@ const Header = () => {
     navigate('/login');
   };
 
+  const isHome = location.pathname === '/';
+
   return (
     <Navbar bg="primary" variant="dark" expand="lg" sticky="top" className="shadow-sm">
-      <Container>
-        <Navbar.Brand as={Link} to="/" className="fw-bold fs-4">
+      <Container fluid className="px-3 px-md-4">
+        <Navbar.Brand as={Link} to="/" className="fw-bold fs-4 text-white">
           🥗 Veg4You
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="navbar-nav" />
         <Navbar.Collapse id="navbar-nav">
-          <Nav className="ms-auto align-items-center">
+          <Nav className="ms-auto align-items-center w-100 d-flex flex-wrap justify-content-end">
 
-            {/* 🔍 Search bar for users only */}
-            {user && !user.isAdmin && (
-              <Form className="d-flex me-3" onSubmit={(e) => e.preventDefault()}>
+            {/* 🔍 Search Bar - Only on Home */}
+            {isHome && (
+              <Form className="d-flex flex-grow-1 flex-md-shrink-0 me-md-3 my-2 my-md-0" onSubmit={(e) => e.preventDefault()}>
                 <FormControl
                   type="search"
                   placeholder="Search vegetables..."
                   className="me-2"
                   aria-label="Search"
-                  style={{ width: '200px' }}
+                  style={{ minWidth: '150px' }}
                 />
                 <Button variant="light" size="sm">Search</Button>
               </Form>
             )}
 
-            {/* 🛒 Cart for users only */}
+            {/* 🛒 Cart */}
             {user && !user.isAdmin && (
-              <Nav.Link as={Link} to="/cart" className="position-relative me-3">
+              <Nav.Link as={Link} to="/cart" className="position-relative text-white me-3">
                 <i className="bi bi-cart-fill fs-5"></i>
                 {items.length > 0 && (
                   <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle">
@@ -61,40 +63,52 @@ const Header = () => {
               </Nav.Link>
             )}
 
+            {/* User Logged In */}
             {user ? (
-              <NavDropdown title={<><i className="bi bi-person-circle me-1"></i>{user.name}</>} id="user-menu">
+              <>
+                {/* Highlighted Username */}
+                <Nav.Link as={Link} to="#" className="fw-bold text-uppercase text-white me-2">
+                  <i className="bi bi-person-circle me-1"></i> {user.name}
+                </Nav.Link>
+
+                {/* My Profile (common to all) */}
+                <Nav.Link as={Link} to="/profile" className="text-white me-2">
+                  <i className="bi bi-person-lines-fill"></i> My Profile
+                </Nav.Link>
+
+                {/* My Orders (user only) */}
                 {!user.isAdmin && (
-                  <NavDropdown.Item as={Link} to="/orders">
+                  <Nav.Link as={Link} to="/orders" className="text-white me-2">
                     <i className="bi bi-bag-check-fill"></i> My Orders
-                  </NavDropdown.Item>
+                  </Nav.Link>
                 )}
 
+                {/* Admin Panel */}
                 {user.isAdmin && (
                   <>
-                    <NavDropdown.Divider />
-                    <NavDropdown.Item as={Link} to="/admin/products">
-                      <i className="bi bi-box-seam"></i> Manage Products
-                    </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to="/admin/orders">
-                      <i className="bi bi-truck"></i> Manage Orders
-                    </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to="/admin/users">
-                      <i className="bi bi-people-fill"></i> Manage Users
-                    </NavDropdown.Item>
+                    <Nav.Link as={Link} to="/admin/products" className="text-white me-2">
+                      <i className="bi bi-box-seam"></i> Products
+                    </Nav.Link>
+                    <Nav.Link as={Link} to="/admin/orders" className="text-white me-2">
+                      <i className="bi bi-truck"></i> Orders
+                    </Nav.Link>
+                    <Nav.Link as={Link} to="/admin/users" className="text-white me-2">
+                      <i className="bi bi-people-fill"></i> Users
+                    </Nav.Link>
                   </>
                 )}
 
-                <NavDropdown.Divider />
-                <NavDropdown.Item onClick={handleLogout}>
+                {/* Logout */}
+                <Nav.Link onClick={handleLogout} className="text-white">
                   <i className="bi bi-box-arrow-right"></i> Logout
-                </NavDropdown.Item>
-              </NavDropdown>
+                </Nav.Link>
+              </>
             ) : (
               <>
-                <Nav.Link as={Link} to="/login">
+                <Nav.Link as={Link} to="/login" className="text-white me-2">
                   <i className="bi bi-box-arrow-in-right"></i> Login
                 </Nav.Link>
-                <Nav.Link as={Link} to="/register">
+                <Nav.Link as={Link} to="/register" className="text-white">
                   <i className="bi bi-person-plus-fill"></i> Register
                 </Nav.Link>
               </>

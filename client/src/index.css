@@ -19,6 +19,11 @@ code {
 .card-body {
   min-height: 200px;
 }
+@media (max-width: 576px) {
+  .navbar .form-control {
+    width: 100% !important;
+  }
+}
 
 
 

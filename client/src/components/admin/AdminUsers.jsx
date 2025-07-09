@@ -26,6 +26,7 @@ const AdminUsers = () => {
               <th>#</th>
               <th>Name</th>
               <th>Email</th>
+              <th>Mobile</th>
               <th>Address</th>
               <th>Admin</th>
               <th>Orders</th>
@@ -37,6 +38,7 @@ const AdminUsers = () => {
                 <td>{idx + 1}</td>
                 <td>{user.name}</td>
                 <td>{user.email}</td>
+                <td>{user.mobile}</td>
                 <td>{user.address || 'N/A'}</td>
                 <td>{user.isAdmin ? '✅' : '❌'}</td>
                 <td>

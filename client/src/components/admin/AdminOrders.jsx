@@ -34,18 +34,19 @@ import {
 } from 'react-icons/fa';
 
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 const AdminOrders = () => {
   const dispatch = useDispatch();
   const { orders, loading, error } = useSelector((state) => state.orders);
   const { users } = useSelector((state) => state.auth);
   const { products } = useSelector((state) => state.products);
-
+console.log(products);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
 
   useEffect(() => {
     dispatch(fetchAllOrders());
@@ -75,15 +76,16 @@ const AdminOrders = () => {
 
   const lowStock = products.filter((p) => p.stock < 5);
 
-  const filteredOrders = orders.orders
-    .filter((order) =>
-      statusFilter === 'all' ? true : order.status === statusFilter
-    )
-    .filter(
-      (order) =>
-        order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.address?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+ const filteredOrders = (orders?.orders || [])
+  .filter((order) =>
+    statusFilter === 'all' ? true : order.status === statusFilter
+  )
+  .filter(
+    (order) =>
+      order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.address?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
 
   // 📄 Export all orders to PDF
   const handleExportAllPDF = () => {
@@ -100,7 +102,7 @@ const AdminOrders = () => {
       order.address,
     ]);
 
-    doc.autoTable({
+    autoTable(doc,{
       head: [['#', 'User', 'Products', 'Total', 'Delivery', 'Status', 'Address']],
       body: rows,
       startY: 15,
@@ -127,7 +129,7 @@ const AdminOrders = () => {
       p.price ? `₹${p.price * p.quantity}` : '—',
     ]);
 
-    doc.autoTable({
+    autoTable(doc,{
       startY: 50,
       head: [['#', 'Product', 'Qty', 'Price', 'Total']],
       body: productsData,

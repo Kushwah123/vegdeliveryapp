@@ -13,8 +13,8 @@ export const placeOrder = async (req, res) => {
     deliveryCharge,
   });
   const saved = await order.save();
-  // await sendOrderEmail(req.user, order);
-  res.status(201).json(saved);
+  // await sendOrderEmail(req.user, );
+  res.status(201).json({ success: true, saved });
 };
 
 export const getUserOrders = async (req, res) => {

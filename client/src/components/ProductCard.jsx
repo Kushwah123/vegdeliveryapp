@@ -8,7 +8,7 @@ const ProductCard = ({ product }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
-  const { items } = useSelector((state) => state.cart); // Redux cart items
+  const { items } = useSelector((state) => state.cart);
 
   const [quantity, setQuantity] = useState(1);
 
@@ -27,19 +27,47 @@ const ProductCard = ({ product }) => {
     };
 
     const existingItem = items.find((i) => i.productId === product._id);
-    let updatedCart;
+    const updatedCart = existingItem
+      ? items.map((i) => (i.productId === product._id ? newItem : i))
+      : [...items, newItem];
 
-    if (existingItem) {
-      updatedCart = items.map((i) =>
-        i.productId === product._id ? newItem : i
-      );
-    } else {
-      updatedCart = [...items, newItem];
+    dispatch(addProductToCart(newItem));
+    dispatch(updateCart(updatedCart));
+  };
+
+  const handleBuyNow = () => {
+    if (!user) {
+      navigate('/login');
+      return;
     }
 
-    dispatch(addProductToCart(newItem));        // ✅ Redux local update
-    dispatch(updateCart(updatedCart));   // ✅ Backend sync
+    const tempItem = {
+      productId: product._id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      quantity: Number(quantity),
+    };
+
+    navigate('/checkout', { state: { item: tempItem } });
   };
+
+ const handleWhatsAppShare = () => {
+  const msg = `🌿 *${product.name}* अब उपलब्ध है!
+
+💰 *कीमत:* ₹${product.price}/kg
+📦 *कैटेगरी:* ${product.category}
+
+
+🛒 *ऑर्डर करें:* https://veg4you.netlify.app/product/${product._id}
+
+📲 ताज़ी सब्ज़ियाँ सीधे आपके दरवाज़े तक!
+*Veg4You* के साथ अब खरीदारी और भी आसान है।`;
+
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(whatsappUrl, '_blank');
+};
+
 
   return (
     <Card className="mb-4 shadow-sm">
@@ -56,6 +84,7 @@ const ProductCard = ({ product }) => {
           <br />
           <small className="text-muted">{product.category}</small>
         </Card.Text>
+
         <Form.Group controlId={`quantity-${product._id}`}>
           <Form.Control
             type="number"
@@ -65,9 +94,19 @@ const ProductCard = ({ product }) => {
             className="mb-2"
           />
         </Form.Group>
-        <Button variant="primary" onClick={handleAddToCart} className="w-100">
-          Add to Cart
-        </Button>
+
+        {/* Buttons in one row, same original design */}
+        <div className="d-flex flex-wrap gap-2">
+          <Button variant="primary" className="w-100" onClick={handleAddToCart}>
+            Add to Cart
+          </Button>
+          <Button variant="success" className="w-100" onClick={handleBuyNow}>
+            Buy Now
+          </Button>
+          <Button variant="success"  className="w-100" onClick={handleWhatsAppShare}>
+            📲 Share on WhatsApp
+          </Button>
+        </div>
       </Card.Body>
     </Card>
   );

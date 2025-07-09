@@ -1,0 +1,20 @@
+.admin-layout {
+  min-height: 100vh;
+  position: relative;
+}
+
+.admin-main-content {
+  margin-left: 250px;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .admin-main-content {
+    margin-left: 0 !important;
+  }
+
+  .admin-sidebar {
+    height: 100%;
+    width: 250px;
+  }
+}
