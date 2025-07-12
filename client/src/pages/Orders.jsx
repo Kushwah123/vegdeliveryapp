@@ -1,24 +1,59 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Container, Table, Badge } from 'react-bootstrap';
-import { fetchMyOrders} from '../features/orderSlice';
+import { fetchMyOrders } from '../features/orderSlice';
 
 const Orders = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { myOrders, loading, error } = useSelector((state) => state.orders); // ✅ fixed line
-  console.log(myOrders);
+  const { myOrders, loading, error } = useSelector((state) => state.orders);
+
   useEffect(() => {
     if (user) dispatch(fetchMyOrders());
   }, [dispatch, user]);
 
+  const renderStatusBadge = (status) => {
+    const variant =
+      status === 'pending'
+        ? 'warning'
+        : status === 'delivered'
+        ? 'success'
+        : 'danger';
+    return <Badge bg={variant}>{status}</Badge>;
+  };
+
+  const renderPaymentBadge = (method, verified) => {
+    if (method === 'COD') {
+      return <Badge bg="secondary">Cash On Delivery</Badge>;
+    }
+
+    const verificationVariant =
+      verified === 'verified'
+        ? 'success'
+        : verified === 'rejected'
+        ? 'danger'
+        : 'warning';
+
+    return (
+      <>
+        <Badge bg="primary" className="me-1">Online</Badge>
+        <Badge bg={verificationVariant}>
+          {verified ? verified.toUpperCase() : 'PENDING'}
+        </Badge>
+      </>
+    );
+  };
+
   return (
     <Container className="mt-4">
-      <h2 className="mb-4">My Orders</h2>
+      <h2 className="mb-4">📦 My Orders</h2>
+
       {loading ? (
         <p>Loading...</p>
       ) : error ? (
         <p className="text-danger">{error}</p>
+      ) : myOrders.length === 0 ? (
+        <p>No orders found.</p>
       ) : (
         <Table striped bordered hover responsive>
           <thead>
@@ -27,8 +62,10 @@ const Orders = () => {
               <th>Products</th>
               <th>Total</th>
               <th>Delivery</th>
+              <th>Payment</th>
               <th>Status</th>
               <th>Address</th>
+              <th>Date</th>
             </tr>
           </thead>
           <tbody>
@@ -45,14 +82,11 @@ const Orders = () => {
                 <td>₹{order.totalAmount}</td>
                 <td>₹{order.deliveryCharge}</td>
                 <td>
-                  <Badge bg={
-                    order.status === 'pending' ? 'warning'
-                    : order.status === 'delivered' ? 'success'
-                    : 'danger'}>
-                    {order.status}
-                  </Badge>
+                  {renderPaymentBadge(order.paymentMethod, order.paymentVerified)}
                 </td>
+                <td>{renderStatusBadge(order.status)}</td>
                 <td>{order.address}</td>
+                <td>{new Date(order.createdAt).toLocaleDateString()}</td>
               </tr>
             ))}
           </tbody>

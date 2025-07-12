@@ -78,6 +78,21 @@ export const fetchUserOrders = createAsyncThunk('orders/fetchUserOrders', async 
   }
 });
 
+// ✅ NEW: Verify or reject online payment
+export const verifyPaymentStatus = createAsyncThunk(
+  'orders/verifyPayment',
+  async ({ orderId, paymentVerified }, thunkAPI) => {
+    try {
+      const { user } = thunkAPI.getState().auth;
+    const config = { headers: { Authorization: `Bearer ${user.token}` } };
+      const res = await axios.put(`/api/orders/verify-payment/${orderId}`, { paymentVerified },config);
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response.data.message || 'Verification failed');
+    }
+  }
+);
+
 // 🔽 DELETE ORDER
 export const deleteOrderById = createAsyncThunk('orders/deleteOrderById', async (orderId, thunkAPI) => {
   try {
@@ -164,6 +179,13 @@ const orderSlice = createSlice({
       .addCase(updateOrderStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      // ✅ verifyPaymentStatus
+      .addCase(verifyPaymentStatus.fulfilled, (state, action) => {
+        const index = state.orders.orders?.findIndex((o) => o._id === action.payload._id);
+        if (index !== -1) {
+          state.orders.orders[index] = action.payload;
+        }
       })
 
       // ✅ DELETE ORDER

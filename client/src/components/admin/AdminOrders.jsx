@@ -4,6 +4,7 @@ import {
   fetchAllOrders,
   updateOrderStatus,
   deleteOrderById,
+  verifyPaymentStatus,
 } from '../../features/orderSlice';
 import { fetchAllUsers } from '../../features/authSlice';
 import { fetchProducts } from '../../features/productSlice';
@@ -20,6 +21,7 @@ import {
   Spinner,
   Alert,
   Modal,
+  Image,
 } from 'react-bootstrap';
 import {
   FaSearch,
@@ -41,12 +43,11 @@ const AdminOrders = () => {
   const { orders, loading, error } = useSelector((state) => state.orders);
   const { users } = useSelector((state) => state.auth);
   const { products } = useSelector((state) => state.products);
-console.log(products);
+console.log(orders);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-
 
   useEffect(() => {
     dispatch(fetchAllOrders());
@@ -56,6 +57,10 @@ console.log(products);
 
   const handleStatusChange = (orderId, newStatus) => {
     dispatch(updateOrderStatus({ orderId, status: newStatus }));
+  };
+
+  const handleVerifyPayment = (orderId, value) => {
+    dispatch(verifyPaymentStatus({ orderId, paymentVerified: value }));
   };
 
   const openModal = (orderId) => {
@@ -69,25 +74,15 @@ console.log(products);
     setDeleteId(null);
   };
 
-  const today = new Date().toDateString();
-  const newUsersToday = users.filter(
-    (u) => new Date(u.createdAt).toDateString() === today
-  );
-
-  const lowStock = products.filter((p) => p.stock < 5);
-
- const filteredOrders = (orders?.orders || [])
-  .filter((order) =>
-    statusFilter === 'all' ? true : order.status === statusFilter
-  )
-  .filter(
-    (order) =>
-      order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.address?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-
-  // 📄 Export all orders to PDF
+  const filteredOrders = (orders?.orders || [])
+    .filter((order) =>
+      statusFilter === 'all' ? true : order.status === statusFilter
+    )
+    .filter(
+      (order) =>
+        order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.address?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   const handleExportAllPDF = () => {
     const doc = new jsPDF();
     doc.text('All Orders Report', 14, 10);
@@ -102,7 +97,7 @@ console.log(products);
       order.address,
     ]);
 
-    autoTable(doc,{
+    autoTable(doc, {
       head: [['#', 'User', 'Products', 'Total', 'Delivery', 'Status', 'Address']],
       body: rows,
       startY: 15,
@@ -111,7 +106,6 @@ console.log(products);
     doc.save('all_orders.pdf');
   };
 
-  // 🧾 Export individual invoice
   const handleDownloadInvoice = (order) => {
     const doc = new jsPDF();
     doc.setFontSize(14);
@@ -129,7 +123,7 @@ console.log(products);
       p.price ? `₹${p.price * p.quantity}` : '—',
     ]);
 
-    autoTable(doc,{
+    autoTable(doc, {
       startY: 50,
       head: [['#', 'Product', 'Qty', 'Price', 'Total']],
       body: productsData,
@@ -138,35 +132,20 @@ console.log(products);
     const finalY = doc.lastAutoTable.finalY || 70;
     doc.text(`Total Amount: ₹${order.totalAmount}`, 14, finalY + 10);
     doc.text(`Delivery Charge: ₹${order.deliveryCharge}`, 14, finalY + 20);
-    doc.text('GST (0%): ₹0', 14, finalY + 30); // optional
+    doc.text('GST (0%): ₹0', 14, finalY + 30);
     doc.save(`invoice_${order._id}.pdf`);
   };
+
+  const getImageUrl = (screenshotPath) => {
+  if (!screenshotPath) return null;
+  return `http://localhost:5000/${screenshotPath.replace(/\\/g, '/')}`;
+};
+console.log(getImageUrl)
 
   return (
     <Container className="mt-4">
       <h3 className="mb-3 text-success">📦 Manage All Orders</h3>
 
-      {/* 🔔 Alerts */}
-      <div className="mb-4">
-        {newUsersToday.length > 0 && (
-          <Alert variant="info" className="d-flex align-items-center gap-2">
-            <FaUser /> <strong>{newUsersToday.length}</strong> new user(s) today!
-          </Alert>
-        )}
-
-        {lowStock.length > 0 && (
-          <Alert variant="warning" className="d-flex align-items-center gap-2">
-            <FaBox /> <strong>{lowStock.length}</strong> product(s) are low in stock!
-          </Alert>
-        )}
-
-        <Alert variant="dark" className="d-flex align-items-center gap-2">
-          <FaShieldAlt className="text-success" />
-          Secure Admin Access: Authorized personnel only.
-        </Alert>
-      </div>
-
-      {/* 🔍 Filters */}
       <Row className="mb-3">
         <Col md={6}>
           <InputGroup>
@@ -199,7 +178,6 @@ console.log(products);
         </Col>
       </Row>
 
-      {/* 🧾 Table */}
       {loading ? (
         <div className="text-center my-5">
           <Spinner animation="border" variant="success" />
@@ -220,20 +198,20 @@ console.log(products);
               <th>Products</th>
               <th>Total</th>
               <th>Delivery</th>
+              <th>Payment</th>
+              <th>QR Screenshot</th>
               <th>Address</th>
               <th>Date</th>
               <th>Status</th>
-              <th>Action</th>
+              <th>Slot</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody className="text-center align-middle">
             {filteredOrders.map((order, idx) => (
               <tr key={order._id}>
                 <td>{idx + 1}</td>
-                <td>
-                  <FaUser className="me-1 text-primary" />
-                  {order.user?.name}
-                </td>
+                <td>{order.user?.name || 'N/A'}</td>
                 <td className="text-start">
                   <ol className="mb-0 ps-3">
                     {order.products.map((p, i) => (
@@ -243,54 +221,92 @@ console.log(products);
                 </td>
                 <td>₹{order.totalAmount}</td>
                 <td>₹{order.deliveryCharge}</td>
-                <td className="text-start">
-                  <FaMapMarkerAlt className="me-1 text-danger" />
-                  {order.address}
+                <td>
+                  {order.paymentMethod}
+                  {order.paymentMethod === 'Online' && (
+                    <>
+                      <Form.Select
+                        size="sm"
+                        className="mt-2"
+                        value={order.paymentVerified || 'pending'}
+                        onChange={(e) =>
+                          handleVerifyPayment(order._id, e.target.value)
+                        }
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="verified">Verified</option>
+                        <option value="rejected">Rejected</option>
+                      </Form.Select>
+                      <Badge
+                        bg={
+                          order.paymentVerified === 'verified'
+                            ? 'success'
+                            : order.paymentVerified === 'rejected'
+                            ? 'danger'
+                            : 'warning'
+                        }
+                        className="mt-1 text-uppercase"
+                      >
+                        {order.paymentVerified || 'pending'}
+                      </Badge>
+                    </>
+                  )}
                 </td>
                 <td>
-                  <FaCalendarAlt className="me-1 text-secondary" />
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </td>
+  {order.paymentScreenshot ? (
+    <Image
+      src={getImageUrl(order.paymentScreenshot)}
+      alt="QR"
+      fluid
+      rounded
+      style={{
+        width: '100px',
+        height: '100px',
+        objectFit: 'cover',
+        border: '1px solid #ccc',
+      }}
+    />
+  ) : (
+    '—'
+  )}
+</td>
+
+                <td>{order.address}</td>
+                <td>{new Date(order.createdAt).toLocaleDateString()}</td>
                 <td>
                   <Form.Select
                     value={order.status}
-                    onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                    onChange={(e) =>
+                      handleStatusChange(order._id, e.target.value)
+                    }
                     size="sm"
                   >
                     <option value="pending">Pending</option>
                     <option value="delivered">Delivered</option>
                     <option value="cancelled">Cancelled</option>
                   </Form.Select>
-                  <Badge
-                    bg={
-                      order.status === 'pending'
-                        ? 'warning'
-                        : order.status === 'delivered'
-                        ? 'success'
-                        : 'danger'
-                    }
-                    className="mt-2 text-uppercase"
-                  >
-                    {order.status}
-                  </Badge>
                 </td>
                 <td>
-                  <div className="d-flex gap-2 justify-content-center">
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      onClick={() => handleDownloadInvoice(order)}
-                    >
-                      <FaFileInvoice />
-                    </Button>
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      onClick={() => openModal(order._id)}
-                    >
-                      <FaTrash />
-                    </Button>
-                  </div>
+  <Badge bg="info">
+    {order.deliverySlot || '—'}
+  </Badge>
+</td>
+
+                <td>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    onClick={() => handleDownloadInvoice(order)}
+                  >
+                    <FaFileInvoice />
+                  </Button>{' '}
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    onClick={() => openModal(order._id)}
+                  >
+                    <FaTrash />
+                  </Button>
                 </td>
               </tr>
             ))}

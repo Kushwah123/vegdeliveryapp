@@ -18,6 +18,27 @@ const orderSchema = new mongoose.Schema({
     enum: ['pending', 'delivered', 'cancelled'],
     default: 'pending',
   },
+  paymentMethod: {
+    type: String,
+    enum: ['COD', 'Online'],
+    default: 'COD',
+  },
+
+  // ✅ Add this field for QR screenshot image path
+  paymentScreenshot: {
+    type: String, // This will store the image path like: uploads/payments/payment-17234567.jpg
+  },
+  paymentVerified: {
+  type: String,
+  status: ['pending', 'verified', 'rejected'],
+  default: 'pending',
+},
+deliverySlot: {
+  type: String,
+  enum: ['Morning', 'Evening'],
+  default: 'Morning',
+},
+
 }, { timestamps: true });
 
 export default mongoose.model('Order', orderSchema);

@@ -57,7 +57,7 @@ const AdminProducts = () => {
       dispatch(createProduct(form)).then(() => handleClose());
     }
   };
-
+  
   return (
     <>
       <Button variant="success" className="mb-3" onClick={() => handleShow()}>

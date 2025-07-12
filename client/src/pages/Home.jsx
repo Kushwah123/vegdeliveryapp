@@ -45,7 +45,7 @@ const Home = () => {
       {/* 🔶 Top Hero Header */}
       <section className="bg-white py-4 border-bottom shadow-sm mb-4">
         <Container className="d-flex justify-content-between align-items-center flex-wrap">
-          <div>
+          <div >
             <h2 className="fw-bold text-success mb-0">Your Online Vegetable Supermarket</h2>
             <p className="text-muted">Fresh produce delivered to your door</p>
           </div>
