@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector,shallowEqual, useDispatch } from 'react-redux';
 import {
   Container,
   Form,
@@ -9,6 +9,7 @@ import {
   Image,
 } from 'react-bootstrap';
 import { placeOnlineOrderWithScreenshot, placeOrder } from '../features/orderSlice';
+import { fetchDeliveryCharges } from '../features/deliveryChargeSlice';
 import { clearCart } from '../features/cartSlice';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -21,11 +22,16 @@ const Checkout = () => {
   const { items } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
 
+
+ const { charges, loading, error } = useSelector((state) => state.deliveryCharge);
+
   const singleItem = location.state?.item || null;
   const isBuyNow = !!singleItem;
-
+  
+  const [selectedColony, setSelectedColony] = useState('');
+const [deliveryCharge, setDeliveryCharge] = useState(0);
   const [address, setAddress] = useState(user?.address || '');
-  const [deliveryCharge] = useState(40);
+ 
   const [message, setMessage] = useState('');
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [qrScreenshot, setQrScreenshot] = useState(null);
@@ -35,10 +41,22 @@ const Checkout = () => {
   const itemsToShow = isBuyNow ? [singleItem] : items;
 
   useEffect(() => {
+  dispatch(fetchDeliveryCharges());
+}, [dispatch]);
+
+useEffect(() => {
+  console.log("Charges updated:", charges);
+}, [charges]);
+
+  useEffect(() => {
     if (itemsToShow.length === 0) {
       navigate('/');
     }
   }, [itemsToShow, navigate]);
+  useEffect(() => {
+  const colonyCharge = charges.find(c => c.colony === selectedColony);
+  setDeliveryCharge(colonyCharge ? colonyCharge.charge : 0);
+}, [selectedColony, charges]);
 
   const totalAmount = itemsToShow.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -77,7 +95,7 @@ const Checkout = () => {
 🛍️ Items:
 ${itemsToShow.map((item) => `• ${item.name} × ${item.quantity}`).join('\n')}
   `);
-  window.location.href = `https://wa.me/918384895054?text=${whatsappMessage}`;
+   window.open(`https://wa.me/918384895054?text=${whatsappMessage}`, '_blank');
         setTimeout(() => navigate('/orders'), 1500);
       } else {
         setMessage('Failed to place order');
@@ -112,12 +130,12 @@ ${itemsToShow.map((item) => `• ${item.name} × ${item.quantity}`).join('\n')}
 
     if (res?.payload?.success) {
       if (!isBuyNow) dispatch(clearCart());
-      setMessage('Online order placed successfully!');
+     setMessage('Online order placed successfully!');
 
       const whatsappMessage = encodeURIComponent(`
 🛒 *New Online Order*
 👤 Name: ${user?.name}
-🏠 Address: ${address}
+🏠 Address: ${address} 
 💰 Total: ₹${totalAmount + deliveryCharge}
 🧾 Payment: Online (Screenshot uploaded)
 🕒 Slot: ${deliverySlot}
@@ -125,7 +143,8 @@ ${itemsToShow.map((item) => `• ${item.name} × ${item.quantity}`).join('\n')}
 ${itemsToShow.map((item) => `• ${item.name} × ${item.quantity}`).join('\n')}
       `);
 
-      window.location.href = `https://wa.me/918384895054?text=${whatsappMessage}`;
+       window.open(`https://wa.me/918384895054?text=${whatsappMessage}`, '_blank');
+
 
       setTimeout(() => navigate('/orders'), 1500);
     } else {
@@ -139,138 +158,148 @@ ${itemsToShow.map((item) => `• ${item.name} × ${item.quantity}`).join('\n')}
 
 
   return (
-    <Container className="mt-4">
-      <h2 className="mb-4">Confirm Delivery Address</h2>
-      <Card className="p-3">
-        {message && (
-          <Alert variant={message.includes('success') ? 'success' : 'danger'}>
-            {message}
-          </Alert>
-        )}
+  <Container className="mt-4">
+    <h2 className="mb-4 text-center">🧾 Confirm Your Delivery Details</h2>
 
-        <Form>
-          {/* ✅ Address */}
+    <div className="row">
+      {/* Left Side: Address & Slot */}
+      <div className="col-md-6">
+        <Card className="p-4 shadow-sm mb-4">
+          <h5 className="mb-3">📦 Delivery Information</h5>
+
           <Form.Group className="mb-3">
-            <Form.Label>Address</Form.Label>
+            <Form.Label>🏠 Address</Form.Label>
             <Form.Control
               as="textarea"
               rows={3}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               required
+              placeholder="Enter full delivery address"
             />
           </Form.Group>
 
-          {/* ✅ Delivery Slot Selection */}
           <Form.Group className="mb-3">
-            <Form.Label>🛒 Select Delivery Slot</Form.Label>
+            <Form.Label>🕒 Select Delivery Slot</Form.Label>
             <Form.Select
               value={deliverySlot}
               onChange={(e) => setDeliverySlot(e.target.value)}
-              required
             >
               <option value="Morning">Morning (8 AM - 11 AM)</option>
               <option value="Evening">Evening (5 PM - 8 PM)</option>
             </Form.Select>
           </Form.Group>
 
-          {/* ✅ Order Summary */}
-          <h5 className="mt-3">Order Summary</h5>
+          <Form.Group className="mb-3">
+            <Form.Label>🏘️ Select Colony</Form.Label>
+            <Form.Select onChange={(e) => setSelectedColony(e.target.value)}>
+              <option value="">-- Select --</option>
+              {charges.map((c) => (
+                <option key={c._id} value={c.colony}>
+                  {c.colony}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+        </Card>
+      </div>
+
+      {/* Right Side: Order Summary */}
+      <div className="col-md-6">
+        <Card className="p-4 shadow-sm mb-4">
+          <h5 className="mb-3">🧾 Order Summary</h5>
           {itemsToShow.map((item) => (
-            <div key={item.productId}>
-              {item.name} - ₹{item.price} × {item.quantity} = ₹
-              {item.price * item.quantity}
+            <div key={item.productId} className="d-flex justify-content-between">
+              <div>{item.name} × {item.quantity}</div>
+              <div>₹{item.price * item.quantity}</div>
             </div>
           ))}
 
           <hr />
-          <p>Delivery Charge: ₹{deliveryCharge}</p>
-          <h5>
-            <strong>Total Payable: ₹{totalAmount + deliveryCharge}</strong>
+
+          <div className="d-flex justify-content-between">
+            <div>🚚 Delivery Charge</div>
+            <div>₹{deliveryCharge}</div>
+          </div>
+
+          <h5 className="mt-3 d-flex justify-content-between">
+            <strong>Total Payable</strong>
+            <strong>₹{totalAmount + deliveryCharge}</strong>
           </h5>
+        </Card>
 
-          {/* ✅ Payment Options */}
-          {!paymentMethod && (
-            <>
-              <Button
-                variant="success"
-                className="w-100 my-2"
-                onClick={() => setPaymentMethod('COD')}
-              >
-                Pay on Delivery (COD)
-              </Button>
-              <Button
-                variant="primary"
-                className="w-100"
-                onClick={() => setPaymentMethod('Online')}
-              >
-                Pay Now (Online)
-              </Button>
-            </>
-          )}
-
-          {/* ✅ COD Submit */}
-          {paymentMethod === 'COD' && (
-            <Button
-              variant="dark"
-              type="submit"
-              onClick={handleCodSubmit}
-              className="w-100 mt-3"
-            >
-              Confirm COD Order
+        {/* Payment Buttons */}
+        {!paymentMethod && (
+          <div className="d-grid gap-2">
+            <Button variant="success" onClick={() => setPaymentMethod('COD')}>
+              💵 Pay on Delivery (COD)
             </Button>
-          )}
+            <Button variant="primary" onClick={() => setPaymentMethod('Online')}>
+              💳 Pay Online
+            </Button>
+          </div>
+        )}
 
-          {/* ✅ Online Payment Flow */}
-          {paymentMethod === 'Online' && (
-            <>
-              <div className="mt-4">
-                {!showQrStep ? (
-                  <>
-                    <h6>Click below to see QR code and upload payment</h6>
-                    <Button
-                      variant="info"
-                      className="w-100"
-                      onClick={() => setShowQrStep(true)}
-                    >
-                      Show QR Code
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <h6>Scan the QR Code and Pay</h6>
-                    <Image
-                      src="/qr.jpg"
-                      fluid
-                      className="mb-3"
-                      style={{ width: '300px', height: '300px', objectFit: 'contain' }}
-                    />
+        {/* COD Button */}
+        {paymentMethod === 'COD' && (
+          <Button
+            variant="dark"
+            className="mt-3 w-100"
+            onClick={handleCodSubmit}
+          >
+            Confirm COD Order
+          </Button>
+        )}
 
-                    <Form.Group controlId="qrScreenshot">
-                      <Form.Label>Upload Payment Screenshot</Form.Label>
-                      <Form.Control
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setQrScreenshot(e.target.files[0])}
-                      />
-                    </Form.Group>
+        {/* Online Payment */}
+        {paymentMethod === 'Online' && (
+          <Card className="p-3 mt-4 text-center">
+            {!showQrStep ? (
+              <>
+                <p>Click below to upload payment screenshot</p>
+                <Button onClick={() => setShowQrStep(true)}>Show QR</Button>
+              </>
+            ) : (
+              <>
+                <Image
+                  src="/qr.jpg"
+                  fluid
+                  className="mb-3 border"
+                  style={{ maxWidth: '250px', margin: '0 auto' }}
+                />
+                <Form.Group controlId="qrScreenshot">
+                  <Form.Label>Upload Screenshot</Form.Label>
+                  <Form.Control
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setQrScreenshot(e.target.files[0])}
+                  />
+                </Form.Group>
+                <Button
+                  variant="success"
+                  className="mt-3 w-100"
+                  onClick={handleOnlinePaymentSubmit}
+                >
+                  Confirm Online Payment
+                </Button>
+              </>
+            )}
+          </Card>
+        )}
+      </div>
+    </div>
 
-                    <Button
-                      variant="success"
-                      className="mt-3 w-100"
-                      onClick={handleOnlinePaymentSubmit}
-                    >
-                      Confirm Online Payment
-                    </Button>
-                  </>
-                )}
-              </div>
-            </>
-          )}
-        </Form>
-      </Card>
-    </Container>
-  );
-};
+    {/* Message Alert */}
+    {message && (
+      <Alert
+        variant={message.includes('success') ? 'success' : 'danger'}
+        className="mt-4"
+      >
+        {message}
+      </Alert>
+    )}
+  </Container>
+);
+}
 
 export default Checkout;

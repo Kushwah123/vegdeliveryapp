@@ -16,7 +16,7 @@ const AdminPanel = () => {
   }, [dispatch]);
 
   const { products, loading: productLoading } = useSelector((state) => state.products);
-  const { orders: ordersObj, loading: orderLoading } = useSelector((state) => state.orders);
+  const { orders, loading: orderLoading } = useSelector((state) => state.orders);
   const { users, loading: userLoading } = useSelector((state) => state.auth);
 
 
@@ -30,7 +30,8 @@ const AdminPanel = () => {
   //   ? orders.reduce((acc, order) => acc + (order.totalAmount || 0), 0)
   //   : 0;
   // ✅ Safe fallback अगर ordersObj.orders नहीं मिला तो खाली array
-const orderList = Array.isArray(ordersObj?.orders) ? ordersObj.orders : [];
+const orderList = Array.isArray(orders) ? orders : [];
+
 
 const totalSales = orderList.reduce((acc, order) => acc + (order.totalAmount || 0), 0);
 const ordersCount = orderList.length;

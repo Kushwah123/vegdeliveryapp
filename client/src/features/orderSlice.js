@@ -172,7 +172,7 @@ const orderSlice = createSlice({
       })
       .addCase(fetchAllOrders.fulfilled, (state, action) => {
         state.loading = false;
-        state.orders = action.payload;
+          state.orders = Array.isArray(action.payload) ? action.payload : action.payload.orders || [];
       })
       .addCase(fetchAllOrders.rejected, (state, action) => {
         state.loading = false;
@@ -187,7 +187,11 @@ const orderSlice = createSlice({
 .addCase(placeOnlineOrderWithScreenshot.fulfilled, (state, action) => {
   state.loading = false;
   state.success = true;
-  state.orders.push(action.payload);
+    if (Array.isArray(state.orders)) {
+    state.orders.push(action.payload); // ✅ Safe push
+  } else {
+    state.orders = [action.payload]; // ✅ If not array, reinitialize
+  }
 })
 .addCase(placeOnlineOrderWithScreenshot.rejected, (state, action) => {
   state.loading = false;
@@ -212,10 +216,16 @@ const orderSlice = createSlice({
       })
       // ✅ verifyPaymentStatus
       .addCase(verifyPaymentStatus.fulfilled, (state, action) => {
-        const index = state.orders.orders?.findIndex((o) => o._id === action.payload._id);
-        if (index !== -1) {
-          state.orders.orders[index] = action.payload;
-        }
+  const { orderId, newStatus } = action.payload;
+
+  const index = state.orders.findIndex(order => order._id === orderId);
+  if (index !== -1) {
+    // Safe immutable way
+    state.orders[index] = {
+      ...state.orders[index],
+      paymentStatus: newStatus,
+    };
+  }
       })
 
       // ✅ DELETE ORDER

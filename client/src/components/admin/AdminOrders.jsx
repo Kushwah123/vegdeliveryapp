@@ -40,10 +40,13 @@ import autoTable from 'jspdf-autotable';
 
 const AdminOrders = () => {
   const dispatch = useDispatch();
-  const { orders: ordersData, loading, error } = useSelector((state) => state.orders);
-  console.log(ordersData);
+const { orders, loading, error } = useSelector((state) => state.orders);
 
-  const { users } = useSelector((state) => state.auth);
+//   console.log(orders.map((order)=> order.
+// paymentScreenshot
+// ));
+
+    const { users } = useSelector((state) => state.auth);
   const { products } = useSelector((state) => state.products);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -75,15 +78,16 @@ const AdminOrders = () => {
     setDeleteId(null);
   };
 
-  const filteredOrders = (ordersData?.orders || [])
-    .filter((order) =>
-      statusFilter === 'all' ? true : order.status === statusFilter
-    )
-    .filter(
-      (order) =>
-        order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.address?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+const filteredOrders = (orders || [])
+  .filter((order) =>
+    statusFilter === 'all' ? true : order.status === statusFilter
+  )
+  .filter(
+    (order) =>
+      order.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.address?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const handleExportAllPDF = () => {
     const doc = new jsPDF();
     doc.text('All Orders Report', 14, 10);
@@ -137,11 +141,16 @@ const AdminOrders = () => {
     doc.save(`invoice_${order._id}.pdf`);
   };
 
-  const getImageUrl = (screenshotPath) => {
-  if (!screenshotPath) return null;
-  return `http://localhost:5000/${screenshotPath.replace(/\\/g, '/')}`;
+  const BASE_URL = "http://localhost:5000"; // ya production me real URL
+
+ const getImageUrl = (path) => {
+  if (!path) return ""; // agar path hi nahi mila to empty string
+  // Agar path me pehle se 'uploads/' hai to bas jodo
+  return `${BASE_URL}/${path}`;
 };
-// console.log(getImageUrl)
+
+
+console.log(getImageUrl)
 
   return (
     <Container className="mt-4">

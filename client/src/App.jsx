@@ -19,7 +19,7 @@ import AdminPanel from './pages/AdminPanel';
 import { Container } from 'react-bootstrap';
 import AdminLayout from './components/AdminLayout';
 import Profile from './components/Profile';
-
+import DeliveryChargePage from './components/admin/DeliveryChargePage';
 const App = () => {
   const { user } = useSelector((state) => state.auth);
   const isAdmin = user?.isAdmin;
@@ -37,6 +37,7 @@ const App = () => {
     <Route path="/admin/products" element={<AdminProducts />} />
     <Route path="/admin/orders" element={<AdminOrders />} />
     <Route path="/admin/users" element={<AdminUsers />} />
+    <Route path='/admin/delivery' element={<DeliveryChargePage/>}/>
   </Route>
             </Route>
 
@@ -52,6 +53,7 @@ const App = () => {
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/profile" element={<Profile />} />
+
                 </Route>
               </>
             )}

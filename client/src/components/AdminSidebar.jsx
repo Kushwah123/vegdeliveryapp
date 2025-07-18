@@ -33,6 +33,10 @@ const AdminSidebar = ({ show, toggleSidebar }) => {
           <Link to="/admin/users" className="nav-link text-white">
             <i className="bi bi-people-fill me-2"></i> Users
           </Link>
+        </li>        <li className="nav-item my-2">
+        <Link to="/admin/delivery" className="nav-link text-white">   
+            <i className="bi bi-house me-2"></i> Delivary charge
+          </Link>
         </li>
         <li className="nav-item my-2">
           <Link to="/" className="nav-link text-white">

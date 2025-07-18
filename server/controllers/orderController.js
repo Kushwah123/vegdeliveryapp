@@ -11,7 +11,7 @@ export   const    handleOnlinePayment = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: 'Payment screenshot is required' });
     }
-
+    const screenshotPath = req.file?.path?.replace(/\\/g, '/'); // 'uploads/screenshot-123.png'
     const products = JSON.parse(req.body.products);
 
     const order = new Order({
@@ -22,12 +22,17 @@ export   const    handleOnlinePayment = async (req, res) => {
       paymentMethod,
       products,
        deliverySlot, // ✅ new field,
-      paymentScreenshot: req.file.path, // 👈 save screenshot
+      paymentScreenshot: screenshotPath,
     });
 
     await order.save();
 
-    res.status(201).json({ message: 'Order placed', order });
+    res.status(201).json({
+      success: true,
+      message: 'Order placed successfully',
+      order,
+    });
+
   } catch (err) {
     console.error('🛑 Online payment error:', err);
     res.status(500).json({ message: 'Failed to place online order' });

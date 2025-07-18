@@ -9,6 +9,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import cors from 'cors';
 import uploadRoutes from './routes/uploadRoutes.js';
+import deliveryChargeRoutes from './routes/deliveryChargeRoutes.js';
 import path from 'path';
 
 dotenv.config();
@@ -26,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/deliverycharges', deliveryChargeRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
