@@ -8,12 +8,10 @@ import {
   Form,
   Container,
   Card,
-  InputGroup,
-  Badge,
-  Button,
+  InputGroup
 } from 'react-bootstrap';
-import { BsCart3 } from 'react-icons/bs';
-
+import { BsWhatsapp } from 'react-icons/bs';
+import Slider from '../components/Slider';
 const Home = () => {
   const dispatch = useDispatch();
   const { products, loading } = useSelector((state) => state.products);
@@ -42,14 +40,27 @@ const Home = () => {
 
   return (
     <div style={{ backgroundColor: '#f8f9fa' }}>
+
+      {/* ✅ Top Offer Banner */}
+      <div style={{
+        backgroundColor: '#ffefc0',
+        padding: '10px 0',
+        textAlign: 'center',
+        fontWeight: 'bold',
+        color: '#a0522d',
+        fontSize: '16px',
+        borderBottom: '1px solid #e5c07b'
+      }}>
+        🎉 आज की डील: ₹50 की छूट सभी ऑर्डर पर! 🛒 <span style={{ color: '#dc3545' }}>केवल आज के लिए</span>
+      </div>
+      
       {/* 🔶 Top Hero Header */}
       <section className="bg-white py-4 border-bottom shadow-sm mb-4">
         <Container className="d-flex justify-content-between align-items-center flex-wrap">
-          <div >
+          <div>
             <h2 className="fw-bold text-success mb-0">Your Online Vegetable Supermarket</h2>
             <p className="text-muted">Fresh produce delivered to your door</p>
           </div>
-        
         </Container>
       </section>
 
@@ -129,6 +140,27 @@ const Home = () => {
           </Col>
         </Row>
       </Container>
+
+      {/* ✅ Floating WhatsApp Button */}
+      <a
+        href="https://wa.me/918384895054?text=Hello%2C%20I%20need%20help%20regarding%20my%20order."
+        className="whatsapp-help-btn"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          backgroundColor: '#25D366',
+          color: 'white',
+          borderRadius: '50%',
+          padding: '10px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          zIndex: 999
+        }}
+      >
+        <BsWhatsapp size={36} />
+      </a>
     </div>
   );
 };

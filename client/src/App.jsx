@@ -18,6 +18,7 @@ import AdminUsers from './components/admin/AdminUsers';
 import AdminPanel from './pages/AdminPanel';
 import { Container } from 'react-bootstrap';
 import AdminLayout from './components/AdminLayout';
+import Profile from './components/Profile';
 
 const App = () => {
   const { user } = useSelector((state) => state.auth);
@@ -50,6 +51,7 @@ const App = () => {
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/orders" element={<Orders />} />
+                  <Route path="/profile" element={<Profile />} />
                 </Route>
               </>
             )}

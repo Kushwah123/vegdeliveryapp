@@ -40,10 +40,11 @@ import autoTable from 'jspdf-autotable';
 
 const AdminOrders = () => {
   const dispatch = useDispatch();
-  const { orders, loading, error } = useSelector((state) => state.orders);
+  const { orders: ordersData, loading, error } = useSelector((state) => state.orders);
+  console.log(ordersData);
+
   const { users } = useSelector((state) => state.auth);
   const { products } = useSelector((state) => state.products);
-console.log(orders);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
@@ -74,7 +75,7 @@ console.log(orders);
     setDeleteId(null);
   };
 
-  const filteredOrders = (orders?.orders || [])
+  const filteredOrders = (ordersData?.orders || [])
     .filter((order) =>
       statusFilter === 'all' ? true : order.status === statusFilter
     )
@@ -140,7 +141,7 @@ console.log(orders);
   if (!screenshotPath) return null;
   return `http://localhost:5000/${screenshotPath.replace(/\\/g, '/')}`;
 };
-console.log(getImageUrl)
+// console.log(getImageUrl)
 
   return (
     <Container className="mt-4">

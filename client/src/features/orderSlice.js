@@ -78,6 +78,21 @@ export const fetchUserOrders = createAsyncThunk('orders/fetchUserOrders', async 
   }
 });
 
+// 🔽 PLACE ONLINE ORDER WITH SCREENSHOT
+export const placeOnlineOrderWithScreenshot = createAsyncThunk(
+  'orders/placeOnlineOrderWithScreenshot',
+  async ({ formData }, thunkAPI) => {
+    try {
+      const { user } = thunkAPI.getState().auth;
+      const config = { headers: { Authorization: `Bearer ${user.token}` } };
+      const res = await axios.post(`${API}/api/orders/online-payment`, formData, config);
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response?.data?.message || err.message);
+    }
+  }
+);
+
 // ✅ NEW: Verify or reject online payment
 export const verifyPaymentStatus = createAsyncThunk(
   'orders/verifyPayment',
@@ -163,6 +178,21 @@ const orderSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
+// ✅ PLACE ONLINE ORDER WITH SCREENSHOT
+.addCase(placeOnlineOrderWithScreenshot.pending, (state) => {
+  state.loading = true;
+  state.success = false;
+  state.error = null;
+})
+.addCase(placeOnlineOrderWithScreenshot.fulfilled, (state, action) => {
+  state.loading = false;
+  state.success = true;
+  state.orders.push(action.payload);
+})
+.addCase(placeOnlineOrderWithScreenshot.rejected, (state, action) => {
+  state.loading = false;
+  state.error = action.payload;
+})
 
       // ✅ UPDATE ORDER STATUS
       .addCase(updateOrderStatus.pending, (state) => {

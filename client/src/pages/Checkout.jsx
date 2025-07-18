@@ -8,7 +8,7 @@ import {
   Alert,
   Image,
 } from 'react-bootstrap';
-import { placeOrder } from '../features/orderSlice';
+import { placeOnlineOrderWithScreenshot, placeOrder } from '../features/orderSlice';
 import { clearCart } from '../features/cartSlice';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -66,6 +66,18 @@ const Checkout = () => {
       if (res.type === 'orders/placeOrder/fulfilled') {
         if (!isBuyNow) dispatch(clearCart());
         setMessage('Order placed successfully!');
+          // 👉 WhatsApp भेजें
+  const whatsappMessage = encodeURIComponent(`
+🛒 *New Order Received*
+👤 Name: ${user?.name}
+🏠 Address: ${address}
+💰 Total: ₹${totalAmount + deliveryCharge}
+🧾 Payment: COD
+🕒 Slot: ${deliverySlot}
+🛍️ Items:
+${itemsToShow.map((item) => `• ${item.name} × ${item.quantity}`).join('\n')}
+  `);
+  window.location.href = `https://wa.me/918384895054?text=${whatsappMessage}`;
         setTimeout(() => navigate('/orders'), 1500);
       } else {
         setMessage('Failed to place order');
@@ -74,47 +86,57 @@ const Checkout = () => {
   };
 
   const handleOnlinePaymentSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!address.trim()) {
-      alert('Please enter a valid delivery address');
-      return;
+  if (!address.trim()) {
+    alert('Please enter a valid delivery address');
+    return;
+  }
+
+  if (!qrScreenshot) {
+    alert('Please upload the screenshot of your payment');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('screenshot', qrScreenshot);
+  formData.append('address', address);
+  formData.append('totalAmount', totalAmount);
+  formData.append('deliveryCharge', deliveryCharge);
+  formData.append('paymentMethod', 'Online');
+  formData.append('deliverySlot', deliverySlot);
+  formData.append('products', JSON.stringify(itemsToShow));
+
+  try {
+    const res = await dispatch(placeOnlineOrderWithScreenshot({ formData }));
+
+    if (res?.payload?.success) {
+      if (!isBuyNow) dispatch(clearCart());
+      setMessage('Online order placed successfully!');
+
+      const whatsappMessage = encodeURIComponent(`
+🛒 *New Online Order*
+👤 Name: ${user?.name}
+🏠 Address: ${address}
+💰 Total: ₹${totalAmount + deliveryCharge}
+🧾 Payment: Online (Screenshot uploaded)
+🕒 Slot: ${deliverySlot}
+🛍️ Items:
+${itemsToShow.map((item) => `• ${item.name} × ${item.quantity}`).join('\n')}
+      `);
+
+      window.location.href = `https://wa.me/918384895054?text=${whatsappMessage}`;
+
+      setTimeout(() => navigate('/orders'), 1500);
+    } else {
+      alert(res?.payload?.message || 'Payment failed');
     }
+  } catch (err) {
+    console.error(err);
+    alert('Error placing order');
+  }
+};
 
-    if (!qrScreenshot) {
-      alert('Please upload the screenshot of your payment');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('screenshot', qrScreenshot);
-    formData.append('address', address);
-    formData.append('totalAmount', totalAmount);
-    formData.append('deliveryCharge', deliveryCharge);
-    formData.append('paymentMethod', 'Online');
-    formData.append('deliverySlot', deliverySlot); // ✅ Add slot here
-    formData.append('products', JSON.stringify(itemsToShow));
-
-    try {
-      const res = await fetch('/api/orders/online-payment', {
-        method: 'POST',
-        body: formData,
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        if (!isBuyNow) dispatch(clearCart());
-        setMessage('Online order placed successfully!');
-        setTimeout(() => navigate('/orders'), 1500);
-      } else {
-        alert(data.message || 'Payment failed');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Error placing order');
-    }
-  };
 
   return (
     <Container className="mt-4">

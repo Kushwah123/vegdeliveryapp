@@ -25,6 +25,45 @@ code {
   }
 }
 
+/* ✅ WhatsApp Help Button */
+.whatsapp-help-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #25D366;
+  color: white;
+  padding: 14px;
+  border-radius: 50%;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+.whatsapp-help-btn:hover {
+  transform: scale(1.1);
+  background-color: #20c05c;
+}
+.whatsapp-help-btn::after {
+  content: 'Need Help?';
+  position: absolute;
+  top: -30px;
+  right: 0;
+  background: #333;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.whatsapp-help-btn:hover::after {
+  opacity: 1;
+}
+
+
 
 
 @tailwind base;
