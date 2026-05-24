@@ -1,4 +1,6 @@
+
 # 🥦 Veg4You - Online Vegetable Delivery Web App
+<img width="1909" height="885" alt="Veg4you-Home" src="https://github.com/user-attachments/assets/d05f2391-35f1-4819-bf7f-5fd3e1250d4c" /><img width="1888" height="897" alt="veg4you-cart" src="https://github.com/user-attachments/assets/20bf5c3b-3424-4fe1-8b9f-644725512048" />
 
 A full-stack responsive web application for vegetable delivery with User & Admin panels, JWT authentication, live order management, and delivery charges based on location.
 
