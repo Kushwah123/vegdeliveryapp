@@ -1,7 +1,7 @@
-<img width="1909" height="885" alt="Veg4you-Home" src="https://github.com/user-attachments/assets/18eb9243-9c32-4d59-b2ce-f255aa30e439" />
+
 
 # 🥦 Veg4You - Online Vegetable Delivery Web App
-
+<img width="1909" height="885" alt="Veg4you-Home" src="https://github.com/user-attachments/assets/18eb9243-9c32-4d59-b2ce-f255aa30e439" />
 
 A full-stack responsive web application for vegetable delivery with User & Admin panels, JWT authentication, live order management, and delivery charges based on location.
 
@@ -17,11 +17,9 @@ A full-stack responsive web application for vegetable delivery with User & Admin
 
 ## 📸 Screenshots
 
-| Home Page | Product Page | Admin Dashboard |
-|-----------|--------------|-----------------|
-| ![Home](<img width="1909" height="885" alt="Veg4you-Home" src="https://github.com/user-attachments/assets/d05f2391-35f1-4819-bf7f-5fd3e1250d4c" />) | ![Products]( <img width="1888" height="897" alt="veg4you-cart" src="https://github.com/user-attachments/assets/eb6bba4f-9d63-44a7-b9aa-4e8d979e890a" />
-) | ![Admin]( <img width="1905" height="768" alt="veg4you-admin" src="https://github.com/user-attachments/assets/656a3231-5d8b-4673-8834-0cfbfd331cca" />
-) |
+
+<img width="1909" height="885" alt="Veg4you-Home" src="https://github.com/user-attachments/assets/d05f2391-35f1-4819-bf7f-5fd3e1250d4c"  <img width="1888" height="897" alt="veg4you-cart" src="https://github.com/user-attachments/assets/eb6bba4f-9d63-44a7-b9aa-4e8d979e890a" />
+ <img width="1905" height="768" alt="veg4you-admin" src="https://github.com/user-attachments/assets/656a3231-5d8b-4673-8834-0cfbfd331cca" />
 
 ---
 
